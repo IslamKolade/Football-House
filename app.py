@@ -20,7 +20,7 @@ app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///FootballHouse.db'
 
 #POSTGRES DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sqspgxehvfoswt:357ab43d400c7228acd5f27ba64189a725d9bf342533ce66111b6910953024e6@ec2-44-205-63-142.compute-1.amazonaws.com:5432/d29t6a74ui5b6p'
+app.config['SQLALCHEMY_DATABASE_URI'] = ('postgres://rvbrqpkdzzzcti:c85cfb0734f4559a2beb51ef17554bdbdb9278a6fb935cf8599548aedc245dba@ec2-54-86-106-48.compute-1.amazonaws.com:5432/ddl69nl7mmpcip').replace("://", "ql://", 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'nonsense'
