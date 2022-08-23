@@ -1,8 +1,4 @@
-import email
 import os
-from enum import unique
-from turtle import title
-from unicodedata import name
 from flask import Flask, redirect, render_template, flash, request, url_for
 from werkzeug.utils import secure_filename
 import uuid as uuid
