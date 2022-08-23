@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block  content %}
+
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <br><br>
+    <div class="card">
+      <div class="card-header">
+        @{{ current_user.username }}
+      </div>
+    <div class="card-body">
+      <p class="card-text">
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-8">
+    
+        <strong>Last Name:</strong>
+      {{ current_user.last_name }}<br/> <br>
+    
+      <strong>Username:</strong>
+      {{ current_user.username }}<br/> <br>
+    
+      <strong>First name:</strong>
+      {{ current_user.first_name }}<br/> <br>
+    
+      <strong>Email:</strong>
+      {{ current_user.email }}<br/> <br>
+    
+      <strong>About:</strong>
+      {{ current_user.about }}<br/> <br>
+    
+      <strong>Profile Pic:</strong>
+      {{ current_user.profile_pic }}<br/> <br>
+    
+      <strong>Date Joined:</strong>
+      {{ current_user.date_joined }}<br/> <br>
+    
+          
+        </p>
+        <a href="{{ url_for('LogOut')}}" class="btn btn-danger">Logout</a>
+    
+        <a href="{{ url_for('update', id=current_user.id)}}" class="btn btn-danger">Update Profile</a>
+    
+        <a href="{{ url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
+        <br/><br/>
+    
+        
+      </div>
+      <div class="col-4">
+        {% if current_user.profile_pic %}
+    
+        <img src="{{ url_for('static', filename='images/' + current_user.profile_pic)}}" width="200" align="right">
+        
+        {% else %}
+        <br><br>
+        <img src="{{ url_for('static', filename='images/default_profile_pic.png')}}" width="200" align="right">
+    
+        {% endif %}
+      
+      </div>
+      </div>
+      </div>
+    
+    
+      </div>
+    </div>
+      
+
+    {% endblock %}
+</body>
+</html>

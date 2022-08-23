@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block  content %}
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    <br>
+    <a href="/add-post" style="text-decoration: none;" ><img src="{{url_for('static', filename='images/addpost.png')}}" alt="post icon" height="40px" style="float: right;"></a>
+    <br><br>
+    {% for post in posts %}
+    <div class="shadow p-3 mb-5 bg-body rounded">
+        <b>{{post.title}}</b><br>
+        By: {{post.poster.username}} <br>
+        {{post.content|safe}} <br>
+        On: {{post.date_posted}}
+        <br>
+        <a href="{{ url_for ('fullpost', id = post.id)}}" class="btn btn-danger btn-sm">View Post</a>
+        {% if current_user.id == post.poster_id %}
+        <a href="{{ url_for ('edit_post', id = post.id)}}" class="btn btn-danger btn-sm">Edit Post</a>
+        <a href="{{ url_for ('delete_post', id = post.id)}}" class="btn btn-danger btn-sm">Delete Post</a>
+        {% endif %}
+        <br>
+    </div>
+    {% endfor %}
+    {% endblock %}
+</body>
+</html>

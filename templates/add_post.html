@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block  content %}
+    <br>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    
+    {% if current_user.is_authenticated %}
+    <div style="text-align: center;">
+        <form method="POST" enctype="multipart/form-data" class="container">
+            <legend style="font-size:30px; color: red;">Create Post</legend>
+            {{form.hidden_tag()}}
+            {{form.title.label(class='form-label')}}
+            {{form.title(class='form-control', placeholder="What's the title of your post?")}}<br>
+                
+                
+            {{form.content.label(class='form-label')}}
+            {{form.content(class='form-control', rows= '7')}}
+
+            <br>{{form.submit(class="btn btn-outline-danger")}}
+        </form>
+    </div>
+    {% else %}
+    <h1>You need to login to create posts</h1>
+    <a href="{{url_for ('SignIn')}}">Sign in here or Sign up if you don't have an account!</a>
+    {% endif %}
+
+    {% endblock %}
+</body>
+</html>
