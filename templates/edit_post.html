@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Football House | Edit Post | {{current_user.username}}</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
 </head>
 <body>
     {% extends 'base.html' %}
@@ -21,16 +22,11 @@
     <div style="text-align: center;">
         <form method="POST" enctype="multipart/form-data" class="container">
             <fieldset>
-                <legend style="font-size:30px; color: red;">Edit Post</legend>
-                {{form.hidden_tag()}}
-                {{form.title.label(class='form-label')}}
-                {{form.title(class='form-control', placeholder="What's the title of your post?")}}<br>
-                
-                
-                {{form.content.label(class='form-label')}}
-                {{form.content(class='form-control', rows= '5')}}
-
-                <br>{{form.submit(class="btn btn-outline-danger")}}
+            <legend style="font-size:30px; color: red;">Edit Post</legend>
+            <label> Edit Content: </label>
+            <textarea name="content" rows="4" class='form-control'>{{ edit_post.content }}</textarea>    
+            <br>
+            <br>{{form.submit(class="btn btn-danger btn-sm")}}
             </fieldset>
         </form>
 

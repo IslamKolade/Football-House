@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Football House | Profile | {{current_user.username}}</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
 </head>
+<style>
+  .center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  max-width: 400px;
+  max-height: 400px;
+}
+</style>
 <body>
     {% extends 'base.html' %}
     {% block  content %}
@@ -16,70 +27,42 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
+    <br>
 
-    <br><br>
     <div class="card">
+      <div>
+        {% if current_user.profile_pic %}
+        <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic)}}" class="center">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/default_profile_pic.png')}}" class="center">
+        {% endif %}
+      </div>
       <div class="card-header">
-        @{{ current_user.username }}
+        <b> Username: @{{ current_user.username }}</b>
       </div>
     <div class="card-body">
-      <p class="card-text">
+      <strong>First name:</strong><br>
+      {{ current_user.first_name }}<br/><br> 
     
-    <div class="container">
-      <div class="row">
-        <div class="col-8">
-    
-        <strong>Last Name:</strong>
+      <strong>Last Name:</strong><br>
       {{ current_user.last_name }}<br/> <br>
     
-      <strong>Username:</strong>
+      <strong>Username:</strong><br>
       {{ current_user.username }}<br/> <br>
     
-      <strong>First name:</strong>
-      {{ current_user.first_name }}<br/> <br>
-    
-      <strong>Email:</strong>
+      <strong>Email:</strong><br>
       {{ current_user.email }}<br/> <br>
     
-      <strong>About:</strong>
+      <strong>About:</strong><br>
       {{ current_user.about }}<br/> <br>
     
-      <strong>Profile Pic:</strong>
-      {{ current_user.profile_pic }}<br/> <br>
-    
-      <strong>Date Joined:</strong>
+      <strong>Date Joined:</strong><br>
       {{ current_user.date_joined }}<br/> <br>
     
-          
-        </p>
-        <a href="{{ url_for('LogOut')}}" class="btn btn-danger">Logout</a>
-    
-        <a href="{{ url_for('update', id=current_user.id)}}" class="btn btn-danger">Update Profile</a>
-    
-        <a href="{{ url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
-        <br/><br/>
-    
-        
-      </div>
-      <div class="col-4">
-        {% if current_user.profile_pic %}
-    
-        <img src="{{ url_for('static', filename='images/' + current_user.profile_pic)}}" width="200" align="right">
-        
-        {% else %}
-        <br><br>
-        <img src="{{ url_for('static', filename='images/default_profile_pic.png')}}" width="200" align="right">
-    
-        {% endif %}
-      
-      </div>
-      </div>
-      </div>
-    
-    
-      </div>
+        <a href="{{ url_for('update', id=current_user.id)}}" class="btn btn-danger btn-sm">Update Profile</a><br><br>
+        <a href="{{ url_for('LogOut')}}" class="btn btn-danger btn-sm">Logout</a>
+        <a href="{{ url_for('delete', id=current_user.id)}}" class="btn btn-danger btn-sm" style="float: right;">Delete Account</a>
     </div>
-      
 
     {% endblock %}
 </body>

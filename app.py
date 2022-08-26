@@ -1,31 +1,34 @@
 import os
+import pathlib
 from flask import Flask, redirect, render_template, flash, request, url_for
 from werkzeug.utils import secure_filename
 import uuid as uuid
-import os
 
-from datetime import datetime, time
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 
-from forms import SignInForm, SignUpForm, UpdateForm, PostForm, SearchForm
+from forms import SignInForm, SignUpForm, UpdateForm, PostForm, SearchForm, EditPostForm
 
 
 #Create a flask instance
 app = Flask(__name__)
 #SQLite Database
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///FootballHouse.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///FootballHouse.db'
 
 #POSTGRES DATABASE
-app.config['SQLALCHEMY_DATABASE_URI'] = ('postgres://rvbrqpkdzzzcti:c85cfb0734f4559a2beb51ef17554bdbdb9278a6fb935cf8599548aedc245dba@ec2-54-86-106-48.compute-1.amazonaws.com:5432/ddl69nl7mmpcip').replace("://", "ql://", 1)
+#app.config['SQLALCHEMY_DATABASE_URI'] = ('postgres://rvbrqpkdzzzcti:c85cfb0734f4559a2beb51ef17554bdbdb9278a6fb935cf8599548aedc245dba@ec2-54-86-106-48.compute-1.amazonaws.com:5432/ddl69nl7mmpcip').replace("://", "ql://", 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'nonsense'
 UPLOAD_FOLDER = 'static/Uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOADVID_FOLDER = os.path.join(pathlib.Path().absolute(), 'static\\Uploads')
+app.config['UPLOADVID_FOLDER'] = UPLOADVID_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 #MYSQL Database
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Kolade16@localhost/fh_users'
 #Secret Key
@@ -80,7 +83,7 @@ def SignIn():
             if check_password_hash(user.password_hash, form.password_hash.data):
                 login_user(user)
                 flash('Login Successful')
-                return redirect(url_for('Profile'))
+                return redirect(url_for('home'))
             else:
                 flash('Incorrect Password, try again.')
         else:
@@ -93,7 +96,7 @@ def SignIn():
 def LogOut():
     logout_user()
     flash('Log out successful')
-    return redirect(url_for('SignIn'))
+    return redirect(url_for('home'))
 
 
 
@@ -106,7 +109,6 @@ def Profile():
 
 @app.route('/SignUp', methods = ['GET', 'POST'])
 def SignUp():
-    first_name = None
     form = SignUpForm()
     #Validate Form
     if form.validate_on_submit():
@@ -122,17 +124,18 @@ def SignUp():
             password_hash = hashed_pw)
             db.session.add(user)
             db.session.commit()
-        first_name = form.first_name.data
-        form.email.data = ''
-        form.first_name.data = ''
-        form.last_name.data = ''
-        form.username.data = ''
-        form.about.data = ''
-        form.password_hash.data = ''
-        flash('User added successfully, now sign in to Football House.')
-        return redirect (url_for('SignIn'))
+            form.email.data = ''
+            form.first_name.data = ''
+            form.last_name.data = ''
+            form.username.data = ''
+            form.about.data = ''
+            form.password_hash.data = ''
+            flash('User added successfully, now sign in to Football House.')
+            return redirect (url_for('SignIn'))
+        else:
+            flash("An account already exists with this email address, sign in here " '<a href="SignIn" style="color: blue;">Sign In</a>')
     my_users = Users.query.order_by(Users.date_joined)
-    return render_template('SignUp.html', first_name = first_name, form = form, my_users = my_users)
+    return render_template('SignUp.html', form = form, my_users = my_users)
 
 
 
@@ -151,46 +154,58 @@ def update(id):
         username_to_update.last_name = request.form['last_name']
         username_to_update.username = request.form['username']
         username_to_update.about = request.form['about']
-        username_to_update.profile_pic = request.files['profile_pic']
-        #Take Image
-        pic_filename = secure_filename(username_to_update.profile_pic.filename)
-        #Set UUID to change profile pic name to random to avoid duplication.
-        pic_name = str(uuid.uuid1()) + '' + pic_filename
-        #Save Image
-        saver = request.files['profile_pic']
 
-        #Convert Image to string to save to database
-        username_to_update.profile_pic = pic_name
+        #Check for Profile Picture
+        if request.files['profile_pic']:
+            username_to_update.profile_pic = request.files['profile_pic']
+            #Take Image
+            pic_filename = secure_filename(username_to_update.profile_pic.filename)
+            #Set UUID to change profile pic name to random to avoid duplication.
+            pic_name = str(uuid.uuid1()) + '' + pic_filename
+            #Save Image
+            saver = request.files['profile_pic']
+            #Convert Image to string to save to database
+            username_to_update.profile_pic = pic_name
 
-
-        try:
+            try:
+                db.session.commit()
+                saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+                flash('User Updated Successfully')
+                return redirect (url_for('Profile', form = form, username_to_update = username_to_update))
+            except:
+                flash('Error, looks like there was a problem. Try again!!')
+                return redirect (url_for('Profile', form = form, username_to_update = username_to_update))
+        else:
             db.session.commit()
-            saver.save(os.path.join(app.config['UPLOAD_FOLDER']), pic_name)
             flash('User Updated Successfully')
-            return redirect (url_for('Profile', form = form, username_to_update = username_to_update))
-        except:
-            flash('Error, looks like there was a problem. Try again!!')
             return redirect (url_for('Profile', form = form, username_to_update = username_to_update))
     else:
         return render_template('update.html', form = form, username_to_update = username_to_update)
 
 #Delete Database Records
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
-    form = SignUpForm()
-    user_to_delete = Users.query.get_or_404(id)
-    first_name = None
-    try:
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        flash('User Deleted Successfully')
-        my_users = Users.query.order_by(Users.date_joined)
-        return render_template('SignUp.html', first_name = first_name, form = form, my_users = my_users)
-    except:
-        flash('Whoops! There was a problem deleting this user.')
-        return render_template('SignUp.html', first_name = first_name, form = form, my_users = my_users)
+    if id == current_user.id or current_user.id == 1:
+        form = SignUpForm()
+        user_to_delete = Users.query.get_or_404(id)
+        first_name = None
+        try:
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            flash('Account Deleted')
+            my_users = Users.query.order_by(Users.date_joined)
+            return redirect(url_for('SignUp', first_name = first_name, form = form, my_users = my_users))
+        except:
+            flash('Whoops! There was a problem deleting this user.')
+            return redirect(url_for('SignUp', first_name = first_name, form = form, my_users = my_users))
+    else:
+        flash("Access Denied")
+        posts = Posts.query.order_by(Posts.date_posted)
+        return redirect(url_for('home', posts = posts))
+
 #Routes
-@app.route('/')
+@app.route('/', methods = ['GET', 'POST'])
 def home():
     posts = Posts.query.order_by(Posts.date_posted)
     return render_template('index.html', posts = posts)
@@ -201,7 +216,8 @@ def home():
 def admin():
     id = current_user.id
     if id == 1:
-        return render_template('admin.html')
+        my_users = Users.query.order_by(Users.date_joined)
+        return render_template('admin.html', my_users = my_users)
     else:
         flash('Access Denied!')
         return redirect(url_for('Profile'))
@@ -214,7 +230,7 @@ def admin():
 def delete_post(id):
     delete_post = Posts.query.get_or_404(id)
     id = current_user.id
-    if id == delete_post.poster.id:
+    if id == delete_post.poster.id or current_user.id == 1:
         try:
             db.session.delete(delete_post)
             db.session.commit()
@@ -225,34 +241,33 @@ def delete_post(id):
             flash('Oops, there was a problem deleting post. Try again')
             return redirect(url_for('home'))
     else:
-        flash('You cant delete that post')
+        flash("You aren't authorized to delete that post")
         posts = Posts.query.order_by(Posts.date_posted)
         return redirect(url_for('home', posts = posts))
 
+        
 
 
-#Edit Posts
+
+#Edit  Image Posts
 @app.route('/post/edit/<int:id>', methods=['GET','POST'])
 @login_required
 def edit_post(id):
     edit_post = Posts.query.get_or_404(id)
-    form = PostForm()
-    if form.validate_on_submit():
-        edit_post.title = form.title.data
-        edit_post.content = form.content.data
-        #Update Post in Database
-        db.session.add(edit_post)
+    form = EditPostForm()
+    if request.method == 'POST':
+        edit_post.content = request.form['content']
         db.session.commit()
         flash('Post Edited Successfully')
-        return redirect(url_for('fullpost', id = edit_post.id))
-    if current_user.id == edit_post.poster_id:
-        form.title.data = edit_post.title
-        form.content.data = edit_post.content
-        return render_template('edit_post.html', form = form)
+        fullpost = Posts.query.get_or_404(id)
+        return redirect (url_for('fullpost', id = fullpost.id))
     else:
-        flash("You aren't authorized to edit this post")
-        posts = Posts.query.order_by(Posts.date_posted)
-        return redirect(url_for('home', posts = posts))
+        if current_user.id == edit_post.poster_id or current_user.id == 1:
+            return render_template('edit_post.html', edit_post = edit_post, form = form)
+        else:
+            flash("You aren't authorized to edit this post")
+            fullpost = Posts.query.get_or_404(id)
+            return redirect(url_for('fullpost', id = fullpost.id))
 
 
 #Full Post
@@ -261,30 +276,162 @@ def fullpost(id):
     fullpost = Posts.query.get_or_404(id)
     return render_template('fullpost.html', fullpost = fullpost)
 
+#Choose Post Type
+@app.route('/post-type')
+def post_type():
+    return render_template('post_type.html')
+
 #Add Post Page
 @app.route('/add-post', methods=['GET','POST'])
 def add_post():
     form = PostForm()
-
     if form.validate_on_submit():
+        topics = request.form['topics']
+        #Check for Post Picture
+        if request.files['post_pic']:
+            post_pic = request.files['post_pic']
+            #Take Image
+            pic_filename = secure_filename(post_pic.filename)
+            #Set UUID to change post pic name to random to avoid duplication.
+            pic_name = str(uuid.uuid1()) + '' + pic_filename
+            #Save Image
+            savepic = request.files['post_pic']
+            #Convert Image to string to save to database
+            post_pic = pic_name
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster, post_pic=post_pic)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            savepic.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+        else:
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+    return render_template('add_post.html', form = form)
+
+
+#Add Video Post Page
+@app.route('/addvid-post', methods=['GET','POST'])
+def add_vidpost():
+    form = PostForm()
+    if form.validate_on_submit():
+        topics = request.form['topics']
+        #Check for Post Picture
+        if request.files['post_vid']:
+            post_vid = request.files['post_vid']
+            #Take Image
+            vid_filename = secure_filename(post_vid.filename)
+            #Set UUID to change post pic name to random to avoid duplication.
+            vid_name = str(uuid.uuid1()) + '' + vid_filename
+            #Save Image
+            savevid = request.files['post_vid']
+            #Convert Image to string to save to database
+            post_vid = vid_name
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster, post_vid=post_vid)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            savevid.save(os.path.join(app.config['UPLOAD_FOLDER'], vid_name))
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+        else:
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+    return render_template('addvid_post.html', form = form)
+
+#Add Audio Post Page
+@app.route('/addaud-post', methods=['GET','POST'])
+def add_audpost():
+    form = PostForm()
+    if form.validate_on_submit():
+        topics = request.form['topics']
+        #Check for Post Picture
+        if request.files['post_aud']:
+            post_aud = request.files['post_aud']
+            #Take Image
+            aud_filename = secure_filename(post_aud.filename)
+            #Set UUID to change post pic name to random to avoid duplication.
+            aud_name = str(uuid.uuid1()) + '' + aud_filename
+            #Save Image
+            saveaud = request.files['post_aud']
+            #Convert Image to string to save to database
+            post_aud = aud_name
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster, post_aud=post_aud)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            saveaud.save(os.path.join(app.config['UPLOAD_FOLDER'], aud_name))
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+        else:
+            poster = current_user.id
+            post = Posts(topics=topics, content=form.content.data, poster_id=poster)
+            #Clear the Form
+            topics=topics = ''
+            content=form.content.data = ''
+            #Add post data to database
+            db.session.add(post)
+            db.session.commit()
+            flash('Posted Successfully')
+            return redirect(url_for('home'))
+    return render_template('addaud_post.html', form = form)
+
+
+
+
+#Add Text Post Page
+@app.route('/addtext-post', methods=['GET','POST'])
+def add_textpost():
+    form = PostForm()
+    if form.validate_on_submit():
+        topics = request.form['topics']
         poster = current_user.id
-        post = Posts(title=form.title.data, content=form.content.data, poster_id=poster)
+        post = Posts(topics=topics, content=form.content.data, poster_id=poster)
         #Clear the Form
-        title=form.title.data = ''
+        topics=topics = ''
         content=form.content.data = ''
         #Add post data to database
         db.session.add(post)
         db.session.commit()
         flash('Posted Successfully')
         return redirect(url_for('home'))
-    return render_template('add_post.html', form = form)
+    return render_template('addtext_post.html', form = form)
+    
 
-#All Posts
-@app.route('/posts')
-def posts():
-    #To show all posts from the database.
-    posts = Posts.query.order_by(Posts.date_posted)
-    return render_template('posts.html', posts = posts)
+
+
+
+
+
 
 
 #Custom Error Message
@@ -306,7 +453,7 @@ class Users(db.Model, UserMixin):
     first_name = db.Column(db.String(200), nullable=False)
     last_name = db.Column(db.String(200), nullable=False)
     username = db.Column(db.String(600), nullable=False, unique=True)
-    about = db.Column(db.Text(), nullable=True)
+    about = db.Column(db.Text, nullable=True)
     profile_pic = db.Column(db.String(), nullable=True)
     date_joined = db.Column(db.Date, default=datetime.now())
     #Password
@@ -332,8 +479,11 @@ class Users(db.Model, UserMixin):
 
 class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(800))
+    topics = db.Column(db.String())
     content = db.Column(db.Text)
     date_posted = db.Column(db.DateTime, default= datetime.utcnow)
+    post_pic = db.Column(db.String)
+    post_vid = db.Column(db.String)
+    post_aud = db.Column(db.String)
     # Foreign Key to Link Users (Going to refer to the primary key of the User)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))

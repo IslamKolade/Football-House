@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football House | Add Audio Post | {{current_user.username}}</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+</head>
+<style>
+    .image-upload>input {
+        display: none;
+    }
+</style>
+<body>
+    {% extends 'base.html' %}
+    {% block  content %}
+    <br>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    
+    {% if current_user.is_authenticated %}
+    <div style="text-align: center;">
+        <form method="POST" enctype="multipart/form-data" class="container">
+            <legend style="font-size:30px; color: red;">Create Post</legend>
+            {{form.hidden_tag()}}
+
+            <label class='form-label'>Select Topic:</label>
+            <select name="topics" class="form-select" aria-label="Default select example" required>
+            <option selected>Pick a topic you want to post on.</option>
+
+            <optgroup label="Leagues">
+            <option value="Premier League">Premier League</option>
+            <option value="La Liga">La Liga</option>
+            <option value="Serie A">Serie A</option>
+            <option value="Ligue 1">Ligue 1</option>
+            <option value="Bundesliga">Bundesliga</option>
+            </optgroup>
+
+            <optgroup label="Competitions">
+                <option value="World Cup">World Cup</option>
+                <option value="UEFA Champions League">UEFA Champions League</option>
+                <option value="UEFA Europa League">UEFA Europa League</option>
+            </optgroup>
+
+            <optgroup label="Games">
+            <option value="FPL">FPL</option>
+            <option value="e-Football">e-Football</option>
+            <option value="FIFA">FIFA</option>
+            <option value="Dream League Soccer">Dream League</option>
+            </optgroup>
+            <b><option value="Others">Others</option></b>
+            </select>
+                
+            {{form.content.label(class='form-label')}}
+            {{form.content(class='form-control', rows= '7')}}
+
+            <br>
+            <div class="image-upload">
+                <label for="file-input" style="float: right;">
+                    Upload Video:
+                  <img src="{{url_for('static', filename='images/audio.png')}}" style="max-width: 40px; max-height: 40px;" />
+                </label>
+                <input id="file-input" type="file" name="post_aud" accept="audio/*"/>
+            </div><br><br>
+            {{form.submit(class="btn btn-danger")}}
+        </form>
+    </div>
+    {% else %}
+    <h1>You need to sign in to create posts.</h1>
+    <a href="{{url_for ('SignIn')}}">Sign in here</a> or <a href="{{url_for ('SignUp')}}">Sign up</a> in just seconds if you don't have an account!
+    {% endif %}
+
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football House | Choose post type | {{current_user.username}}</title>
+    <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+</head>
+<style>
+    .image-upload>input {
+        display: none;
+    }
+</style>
+<body>
+    {% extends 'base.html' %}
+    {% block  content %}
+    <br>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% if current_user.is_authenticated %}
+    <br><br><br><br>
+    <div style="text-align: center;">
+    <h1>Choose your type of post:</h1><br><br>
+    <button type="button" class="btn btn-danger btn-lg"><a href="/addtext-post" style="text-decoration: none; color: white;">Text</a></button><br><br><br>
+    <button type="button" class="btn btn-danger btn-lg"><a href="/add-post" style="text-decoration: none; color: white;">Image</a></button><br><br><br>
+    <button type="button" class="btn btn-danger btn-lg"><a href="/addvid-post" style="text-decoration: none; color: white;">Video</a></button><br><br><br>
+    </div>
+    {% else %}
+    <h1>You need to sign in to create posts.</h1>
+    <a href="{{url_for ('SignIn')}}">Sign in here</a> or <a href="{{url_for ('SignUp')}}">Sign up</a> in just seconds if you don't have an account!
+    {% endif %}
+
+    {% endblock %}
+</body>
+</html>

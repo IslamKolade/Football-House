@@ -12,8 +12,7 @@ class SignUpForm(FlaskForm):
     last_name = StringField('Last Name: ', validators= [DataRequired()])
     username = StringField('Username: ', validators= [DataRequired()])
     about = TextAreaField('About: ', validators= [DataRequired()])
-    profile_pic = FileField('Upload profile picture: ')
-    password_hash = PasswordField('Password: ', validators= [DataRequired(), EqualTo('confirm_password', message= 'Passwords Must Match!')])
+    password_hash = PasswordField('Password: ', validators= [DataRequired(), EqualTo('confirm_password', message= "Passwords don't match!")])
     confirm_password = PasswordField('Confirm Password: ', validators= [DataRequired()])
     submit = SubmitField('Sign Up')
 
@@ -28,14 +27,18 @@ class UpdateForm(FlaskForm):
 
 class SignInForm(FlaskForm):
     email = EmailField('Email Address: ', validators= [DataRequired()])
-    password_hash = PasswordField('Password: ', validators= [DataRequired(), EqualTo('confirm_password', message= 'Passwords Must Match!')])
+    password_hash = PasswordField('Password: ', validators= [DataRequired(), EqualTo('confirm_password', message= "Passwords don't match!")])
     confirm_password = PasswordField('Confirm Password: ', validators= [DataRequired()])
     submit = SubmitField('Sign In')
 
 class PostForm(FlaskForm):
-    title = StringField('Title: ', validators= [DataRequired()])
     content = StringField('Content: ', validators= [DataRequired()], widget=TextArea())
     submit = SubmitField('Post')
+
+class EditPostForm(FlaskForm):
+    content = StringField('Content: ', validators= [DataRequired()], widget=TextArea())
+    submit = SubmitField('Edit Post')
+
 
 class SearchForm(FlaskForm):
     searched = StringField('Searched ', validators= [DataRequired()])

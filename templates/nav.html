@@ -11,7 +11,7 @@
         <div class="container-fluid">
             <nav class="navbar navbar-light bg-light">
                 <div class="">
-                  <a >
+                  <a href="{{ url_for('home')}}">
                     <img src="{{url_for('static', filename='images/FHWEB.jpg')}}" alt="" width="190" height="45">
                   </a>
                 </div>
@@ -34,21 +34,8 @@
                   <a class="nav-link" href="{{url_for ('admin')}}" style="color: white;">Admin</a>
                 </li>
                 {% endif %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{{url_for ('LogOut')}}" style="color: white;">Logout</a>
-                </li>
-              {% else %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{{url_for ('SignUp')}}" style="color: white;">Login/Sign Up</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{url_for ('SignIn')}}" style="color: white;">Sign In</a>
-                </li>
               {% endif %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{url_for ('posts')}}" style="color: white;">Posts</a>
-              </li>
-
+            
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" style="color: white;" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Leagues
@@ -83,6 +70,24 @@
                   <li><a class="dropdown-item" href="#">Fantasy Premier League</a></li>
                 </ul>
               </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('home')}}" style="color: white;">About</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('home')}}" style="color: white;">Contact Us</a>
+              </li>
+              {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for ('LogOut')}}" style="color: white;">Logout</a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for ('SignUp')}}" style="color: white;">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{url_for ('SignIn')}}" style="color: white;">Sign In</a>
+                </li>
+              {% endif %}
             </ul>
             <form class="d-flex" method="POST" action="{{ url_for('search')}}">
               {{form.hidden_tag() }}
@@ -91,6 +96,7 @@
             </form>
           </div>
         </div>
+        
       </nav>
 </body>
 </html>

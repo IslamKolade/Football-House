@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Football House | Home |{{current_user.username}}</title>
     <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
 </head>
 <body>
@@ -17,23 +17,79 @@
     </div>
     {% endfor %}
     <br>
-    <a href="/add-post" style="text-decoration: none;" ><img src="{{url_for('static', filename='images/addpost.png')}}" alt="post icon" height="40px" style="float: right;"></a>
+    <a href="/post-type" style="text-decoration: none;" ><img src="{{url_for('static', filename='images/addpost.png')}}" alt="post icon" height="40px" style="float: right;"></a>
     <br><br>
+
+
     {% for post in posts %}
-    <div class="shadow p-3 mb-5 bg-body rounded">
-        <b>{{post.title}}</b><br>
-        By: {{post.poster.username}} <br>
-        {{post.content|safe}} <br>
-        On: {{post.date_posted}}
-        <br>
-        <a href="{{ url_for ('fullpost', id = post.id)}}" class="btn btn-danger btn-sm">View Post</a>
-        {% if current_user.id == post.poster_id %}
-        <a href="{{ url_for ('edit_post', id = post.id)}}" class="btn btn-danger btn-sm">Edit Post</a>
-        <a href="{{ url_for ('delete_post', id = post.id)}}" class="btn btn-danger btn-sm">Delete Post</a>
+    <div class="rounded border border-2 border border-danger border-opacity-100 text-break" style="padding: 12px;">
+        <div style="width: 100%; font-size: 13px">
+        {% if post.topics == 'Serie A' %}
+            <img src="{{url_for('static', filename='topic_img/Serie A.jpg')}}" alt="Serie A" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'FPL' %}
+            <img src="{{url_for('static', filename='topic_img/FPL.jpeg')}}" alt="FPL" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'Bundesliga' %}
+            <img src="{{url_for('static', filename='topic_img/Bundesliga.jpg')}}" alt="Bundesliga" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'Dream League Soccer' %}
+            <img src="{{url_for('static', filename='topic_img/DLS22.jpg')}}" alt="Dream League" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'e-Football' %}
+            <img src="{{url_for('static', filename='topic_img/eFootball.jpg')}}" alt="e-Football" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'FIFA' %}
+            <img src="{{url_for('static', filename='topic_img/FIFA.jpg')}}" alt="FIFA" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'La Liga' %}
+            <img src="{{url_for('static', filename='topic_img/La Liga.jpg')}}" alt="La Liga" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'Ligue 1' %}
+            <img src="{{url_for('static', filename='topic_img/Ligue 1.jpg')}}" alt="Ligue 1" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'Premier League' %}
+            <img src="{{url_for('static', filename='topic_img/Premier League.jpg')}}" alt="Premier League" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'Others' %}
+            <img src="{{url_for('static', filename='topic_img/FH_name.png')}}" alt="Others" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'UEFA Champions League' %}
+            <img src="{{url_for('static', filename='topic_img/Champions League.jpg')}}" alt="Champions League" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
+        {% elif post.topics == 'UEFA Europa League' %}
+            <img src="{{url_for('static', filename='topic_img/Europa League.jpg')}}" alt="Champions League" style="max-height: 60px; max-width: 60px;" class="rounded-circle">
         {% endif %}
+        
+        {% if post.topics == 'Pick a topic you want to post on.' %}
+        {% else %}
+        <b>Post on {{post.topics}}</b><hr>
+        {% endif %}
+        </div>
+        {{post.content}}<hr>
+
+
+
+        <a href="{{ url_for ('fullpost', id = post.id)}}">
+        <div style="text-align: center;">
+        {% if post.post_pic %}
+            <img src="{{ url_for('static', filename='uploads/' + post.post_pic)}}" alt="" style="max-width: 270px; max-height: 270px; " class="rounded border border-5 border border-danger">   
+            <hr>
+        {% endif %}
+        </div>
+        <div style="text-align: center;">
+        {% if post.post_vid %}
+            <video controls="controls" style="max-width: 270px; max-height: 300px;" class="rounded border border-5 border border-danger">
+                <source src="{{ url_for('static', filename='uploads/' + post.post_vid) }}" type="video/mp4"></source>
+            </video>
+            <hr>
+        {% endif %}
+        </div>
+        <div style="text-align: center;">
+        {% if post.post_aud %}
+            <audio src="{{ url_for('static', filename='uploads/' + post.post_aud) }}" controls = "controls" style="max-width: 270px; max-height: 300px;" class="rounded border border-5 border border-danger"></audio>
+            <hr>
+        {% endif %}
+        </div>
+        </a>
+        
+        Posted: {{post.date_posted}} <br><hr>
+        <a href="{{ url_for ('fullpost', id = post.id)}}" class="btn btn-danger btn-sm" style="float: right;">View Post</a>
         <br>
+
+
+
     </div>
     {% endfor %}
     {% endblock %}
-</body>
+</body> 
 </html>
