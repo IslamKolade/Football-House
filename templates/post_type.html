@@ -23,12 +23,13 @@
     </div>
     {% endfor %}
     {% if current_user.is_authenticated %}
-    <br><br><br><br>
+    <br><br>
     <div style="text-align: center;">
-    <h1>Choose your type of post:</h1><br><br>
+    <h1>Choose your type of post:</h1><br>
     <button type="button" class="btn btn-danger btn-lg"><a href="/addtext-post" style="text-decoration: none; color: white;">Text</a></button><br><br><br>
     <button type="button" class="btn btn-danger btn-lg"><a href="/add-post" style="text-decoration: none; color: white;">Image</a></button><br><br><br>
     <button type="button" class="btn btn-danger btn-lg"><a href="/addvid-post" style="text-decoration: none; color: white;">Video</a></button><br><br><br>
+    <button type="button" class="btn btn-danger btn-lg"><a href="/addaud-post" style="text-decoration: none; color: white;">Audio</a></button><br><br><br>
     </div>
     {% else %}
     <h1>You need to sign in to create posts.</h1>

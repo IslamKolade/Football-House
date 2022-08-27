@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///FootballHouse.db'
 
 #POSTGRES DATABASE
-#app.config['SQLALCHEMY_DATABASE_URI'] = ('postgres://rvbrqpkdzzzcti:c85cfb0734f4559a2beb51ef17554bdbdb9278a6fb935cf8599548aedc245dba@ec2-54-86-106-48.compute-1.amazonaws.com:5432/ddl69nl7mmpcip').replace("://", "ql://", 1)
+#app.config['SQLALCHEMY_DATABASE_URI'] = ('postgres://ienbtdonqdopui:39face1b3665e16811b0408cb4200785f4bdfa2bcfed10b10c95b78fe8a1d853@ec2-3-218-171-44.compute-1.amazonaws.com:5432/db22tu20hnjves').replace("://", "ql://", 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'nonsense'
@@ -30,7 +30,7 @@ UPLOADVID_FOLDER = os.path.join(pathlib.Path().absolute(), 'static\\Uploads')
 app.config['UPLOADVID_FOLDER'] = UPLOADVID_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 #MYSQL Database
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Kolade16@localhost/fh_users'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Kolade16@localhost/footballhouse_users'
 #Secret Key
 #app.config['SECRET_KEY'] = 'gfgrytyujggfff'
 #Initialize Database
@@ -66,7 +66,7 @@ def search():
         postsearched = form.searched.data
         #Query the database
         posts = posts.filter(Posts.content.like('%' + postsearched + '%'))
-        posts = posts.order_by(Posts.title).all()
+        posts = posts.order_by(Posts.topics).all()
         return render_template('search.html', form=form, searched = postsearched, posts = posts) 
 
 
@@ -454,7 +454,7 @@ class Users(db.Model, UserMixin):
     last_name = db.Column(db.String(200), nullable=False)
     username = db.Column(db.String(600), nullable=False, unique=True)
     about = db.Column(db.Text, nullable=True)
-    profile_pic = db.Column(db.String(), nullable=True)
+    profile_pic = db.Column(db.String(400), nullable=True)
     date_joined = db.Column(db.Date, default=datetime.now())
     #Password
     password_hash = db.Column(db.String(400))
@@ -479,11 +479,11 @@ class Users(db.Model, UserMixin):
 
 class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    topics = db.Column(db.String())
+    topics = db.Column(db.String(400))
     content = db.Column(db.Text)
     date_posted = db.Column(db.DateTime, default= datetime.utcnow)
-    post_pic = db.Column(db.String)
-    post_vid = db.Column(db.String)
-    post_aud = db.Column(db.String)
+    post_pic = db.Column(db.String(400))
+    post_vid = db.Column(db.String(400))
+    post_aud = db.Column(db.String(400))
     # Foreign Key to Link Users (Going to refer to the primary key of the User)
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'))
